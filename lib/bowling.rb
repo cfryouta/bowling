@@ -2,12 +2,14 @@ class Bowling
         
     def initialize
         @total_score = 0
-        @score = []
+        @sub_total_score = 0
         @frame_score = []
+        @score = []
+        @frame = []
     end
     
     def add_score(pins)
-        @frame_score << pins
+        @frame << pins
         if strike_get?(pins)
             strike
         else
@@ -25,19 +27,29 @@ class Bowling
         @score.each.with_index do |score, i|
             if strike?(score) && not_last_frame?(i)
                 if next_strike?(i)
-                    @total_score += score.inject(:+) + turkey_bonus(i)
+                    @frame_score << score.inject(:+) + turkey_bonus(i)
                 else
-                    @total_score += score.inject(:+) + double_bonus(i)
+                    @frame_score << score.inject(:+) + double_bonus(i)
                 end
             elsif spare?(score) && not_last_frame?(i)
-                @total_score += score.inject(:+) + calc_spare_bonus(i)
+                @frame_score << score.inject(:+) + calc_spare_bonus(i)
             else
-                @total_score += score.inject(:+)
+                @frame_score << score.inject(:+)
             end
         end
     end
     
+    def frame_score(frame)
+        for num in 0..(frame - 1) do
+            @sub_total_score += @frame_score[num]
+        end
+        @sub_total_score
+    end
+    
     def total_score
+        @frame_score.each do |score|
+            @total_score += score
+        end
         @total_score
     end
     
@@ -85,19 +97,19 @@ class Bowling
 
 # フレームごとに適切に格納するためのメソッド
     def frame_end
-        @score << @frame_score
-        @frame_score = []
+        @score << @frame
+        @frame = []
     end
 
 # ストライクをとった時に適切に@scoreに格納するためのメソッド
     def strike
-        @frame_score << 0
+        @frame << 0
         frame_end
     end
 
 # 2投すると1フレームとして@scoreに格納するためのメソッド
     def frame
-        if @frame_score.size == 2
+        if @frame.size == 2
             frame_end
         end
     end
