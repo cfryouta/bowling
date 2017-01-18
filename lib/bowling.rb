@@ -2,8 +2,7 @@ class Bowling
         
     def initialize
         @total_score = 0
-        @sub_total_score = 0
-        @frame_score = []
+        @sub_total_score = []
         @score = []
         @frame = []
     end
@@ -27,29 +26,24 @@ class Bowling
         @score.each.with_index do |score, i|
             if strike?(score) && not_last_frame?(i)
                 if next_strike?(i)
-                    @frame_score << score.inject(:+) + turkey_bonus(i)
+                    @total_score += score.inject(:+) + turkey_bonus(i)
                 else
-                    @frame_score << score.inject(:+) + double_bonus(i)
+                    @total_score += score.inject(:+) + double_bonus(i)
                 end
             elsif spare?(score) && not_last_frame?(i)
-                @frame_score << score.inject(:+) + calc_spare_bonus(i)
+                @total_score += score.inject(:+) + calc_spare_bonus(i)
             else
-                @frame_score << score.inject(:+)
+                @total_score += score.inject(:+)
             end
+            @sub_total_score << @total_score
         end
     end
     
     def frame_score(frame)
-        for num in 0..(frame - 1) do
-            @sub_total_score += @frame_score[num]
-        end
-        @sub_total_score
+        @sub_total_score[frame - 1]
     end
     
     def total_score
-        @frame_score.each do |score|
-            @total_score += score
-        end
         @total_score
     end
     
