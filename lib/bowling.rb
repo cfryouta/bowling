@@ -40,6 +40,9 @@ class Bowling
     end
     
     def frame_score(frame)
+        if @sub_total_score.size > 10
+            @sub_total_score[9] = @sub_total_score[-1]
+        end
         @sub_total_score[frame - 1]
     end
     
