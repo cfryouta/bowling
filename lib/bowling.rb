@@ -2,32 +2,27 @@ class Bowling
         
     def initialize
         @total_score = 0
-        @array_score = []
+        @score = []
         @frame_score = []
     end
     
     def add_score(pins)
         @frame_score << pins
-        if @frame_score.size == 2
-            frame_end
-        end
-        if pins == 10
-            @frame_score << 0
-            frame_end
+        if strike_get?(pins)
+            strike
+        else
+            frame
         end
     end
     
     def add_many_scores(num, pins)
         num.times do
-            @frame_score << pins
-            if @frame_score.size == 2
-                frame_end
-            end
+            frame
         end
     end
     
     def calc_score
-        @array_score.each.with_index do |score, i|
+        @score.each.with_index do |score, i|
             if strike?(score) && not_last_frame?(i)
                 if next_strike?(i)
                     @total_score += score.inject(:+) + turkey_bonus(i)
@@ -48,36 +43,63 @@ class Bowling
     
     private
     
+# ストライクを取れたかどうかの判定
+    def strike_get?(pins)
+        pins == 10
+    end
+
+# スペアかどうかの判定
     def spare?(score)
         score.inject(:+) == 10
     end
-    
+
+# ストライクかどうかの判定
     def strike?(score)
         score.first == 10
     end
-    
+
+# ダブル以上かどうかの判定
     def next_strike?(index)
-        @array_score[index + 1].first == 10
+        @score[index + 1].first == 10
     end
-    
+
+# 10フレーム目かどうかの判定
     def not_last_frame?(index)
         index < 9
     end
-    
+
+# スペアボーナス
     def calc_spare_bonus(index)
-        @array_score[index + 1].first
+        @score[index + 1].first
     end
-    
+
+# ダブルボーナス
     def double_bonus(index)
-        @array_score[index + 1].inject(:+)
+        @score[index + 1].inject(:+)
     end
-    
+
+# ターキーボーナス
     def turkey_bonus(index)
-        @array_score[index + 1].inject(:+) + @array_score[index + 2].first
+        @score[index + 1].inject(:+) + @score[index + 2].first
     end
-    
+
+# フレームごとに適切に格納するためのメソッド
     def frame_end
-        @array_score << @frame_score
+        @score << @frame_score
         @frame_score = []
     end
+
+# ストライクをとった時に適切に@scoreに格納するためのメソッド
+    def strike
+        @frame_score << 0
+        frame_end
+    end
+
+# 2投すると1フレームとして@scoreに格納するためのメソッド
+    def frame
+        if @frame_score.size == 2
+            frame_end
+        end
+    end
+
 end
