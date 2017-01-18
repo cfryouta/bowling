@@ -6,22 +6,13 @@ describe "ボウリングのスコア計算" do
     @game = Bowling.new
   end
 
-  describe "全体の合計" do
-    context "全ての投球がガターだった場合" do
-      it "0になること" do
-        add_many_scores(20, 0)
-        # 合計を計算
-        @game.calc_score
-        expect(@game.total_score).to eq 0
-      end
-    end
-
+  describe "フレームごとの合計" do
     context "全ての投球で1ピンずつ倒した場合" do
-      it "20になること" do
+      it "1フレーム目の合計が2になること" do
         add_many_scores(20, 1)
         # 合計を計算
         @game.calc_score
-        expect(@game.total_score).to eq 20
+        expect(@game.frame_score(1)).to eq 2
       end
     end
 
@@ -37,49 +28,11 @@ describe "ボウリングのスコア計算" do
         # 合計を計算
         @game.calc_score
         # 期待する合計　※()内はボーナス点
-        # 3 + 7 + 4 + (4) = 18
-        expect(@game.total_score).to eq 18
+        # 3 + 7 + (4) = 14
+        expect(@game.frame_score(1)).to eq 14
       end
     end
 
-    context "フレーム違いでスペアになるようなスコアだった場合" do
-      it "スペアボーナスが加算されないこと" do
-        # 第一フレームで3点, 5点
-        @game.add_score(3)
-        @game.add_score(5)
-        # 第二フレームで5点, 4点
-        @game.add_score(5)
-        @game.add_score(4)
-        # 以降は全てガター
-        add_many_scores(16, 0)
-        # 合計を計算
-        @game.calc_score
-        # 期待する合計
-        # 3 + 5 + 5 + 4 = 17
-        expect(@game.total_score).to eq 17
-      end
-    end
-
-    context "最終フレームでスペアを取った場合" do
-      it "スペアボーナスが加算されないこと" do
-        # 第一フレームで3点, 7点のスペア
-        @game.add_score(3)
-        @game.add_score(7)
-        # 第二フレームの一投目で4点
-        @game.add_score(4)
-        # 15投は全てガター
-        add_many_scores(15, 0)
-        # 最終フレームで3点, 7点のスペア
-        @game.add_score(3)
-        @game.add_score(7)
-        # 合計を計算
-        @game.calc_score
-        # 期待する合計　※()内はボーナス点
-        # 3 + 7 + 4 + (4) + 3 + 7 = 28
-        expect(@game.total_score).to eq 28
-      end
-    end
-    
     context "ストライクを取った場合" do
       it "ストライクボーナスが加算されること" do
         # 第一フレームでストライク
@@ -92,67 +45,30 @@ describe "ボウリングのスコア計算" do
         # 合計を計算
         @game.calc_score
         # 期待する合計　※()内はボーナス点
-        # 10 + 5 + (5) + 4 + (4) = 28
-        expect(@game.total_score).to eq 28
+        # 10 + (5) + (4) = 19
+        expect(@game.frame_score(1)).to eq 19
       end
     end
-
-    context "ダブルを取った場合" do
-      it "それぞれのストライクボーナスが加算されること" do
+    
+    context "テスト" do
+      it "テスト" do
         # 第一フレームでストライク
         @game.add_score(10)
-        # 第二フレームもストライク
+        # 第二フレームでストライク
         @game.add_score(10)
-        # 第三フレームで5点, 4点
+        # 第三フレームでストライク
+        @game.add_score(10)
+        # 第四フレームでストライク
+        @game.add_score(10)
+        # 第五フレームで5点, 4点
         @game.add_score(5)
         @game.add_score(4)
         # 以降は全てガター
-        add_many_scores(14, 0)
+        add_many_scores(10, 0)
         # 合計を計算
         @game.calc_score
-        # 期待する合計　※()内はボーナス点
-        # 10 + 10 + (10) + 5 +(5 + 5) + 4 + (4) = 53
-        expect(@game.total_score).to eq 53
-      end
-    end
-
-    context "ターキーを取った場合" do
-      it "それぞれのストライクボーナスが加算されること" do
-        # 第一フレームでストライク
-        @game.add_score(10)
-        # 第二フレームもストライク
-        @game.add_score(10)
-        # 第三フレームもストライク
-        @game.add_score(10)
-        # 第四フレームで5点, 4点
-        @game.add_score(5)
-        @game.add_score(4)
-        # 以降は全てガター
-        add_many_scores(12, 0)
-        # 合計を計算
-        @game.calc_score
-        # 期待する合計　※()内はボーナス点
-        # 10 + 10 + (10) + 10 + (10 + 10) + 5 +(5 + 5) + 4 + (4) = 83
-        expect(@game.total_score).to eq 83
-      end
-    end
-
-    context "最終フレームでストライクを取った場合" do
-      it "ストライクボーナスが加算されないこと" do
-        # 第一フレームでストライク
-        @game.add_score(10)
-        # 第二フレームで5点, 4点
-        @game.add_score(5)
-        @game.add_score(4)
-        # 3~9フレームは全てガター
-        add_many_scores(14, 0)
-        # 最終フレームでストライク
-        @game.add_score(10)
-        # 合計を計算
-        @game.calc_score
-        # 期待する合計　※()内はボーナス点
-        # 10 + 5 + (5) + 4 + (4) + 10 = 38
-        expect(@game.total_score).to eq 38
+        # 四フレーム目での得点を表示
+        expect(@game.frame_score(4)).to eq 104
       end
     end
   end
